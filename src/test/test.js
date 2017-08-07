@@ -1,9 +1,8 @@
-import nsoap from "../nsoap-express";
+import "./dom";
+import React from "react/addons";
 import should from "should";
-import express from "express";
-import request from "supertest";
-import bodyParser from "body-parser";
-import cookieParser from "cookie-parser";
+
+const TestUtils = React.addons.TestUtils;
 
 const Template = ({ title, content, children }) =>
   <div>
@@ -18,6 +17,9 @@ const Template = ({ title, content, children }) =>
 
 const HomePage = props =>
   <Template title="Home Page" content="Welcome to NSOAP React" />;
+
+const AboutPage = props =>
+  <Template title="About Page" content="This is about NSOAP React" />;
 
 const ParentPage = ({ parentId, children }) =>
   <div>
@@ -71,49 +73,39 @@ const routes = {
 };
 
 const routesAlt = {
-  index: [HomePage],
+  index: <HomePage title="Home" />,
+  about: <AboutPage title="About" />,
   parent: [
     ParentPage,
-    parentId => ({ parentId }),
-    {
-      child: [
-        ChildComponent,
-        childId => ({ childId }),
-        {
-          grandChild1: [
-            GrandChildComponent,
-            () => ({
-              id: "1"
-            })
-          ],
-          grandChild2: [
-            GrandChildComponent,
-            () => ({
-              id: "2"
-            })
+    parentId => [
+      { parentId },
+      {
+        child: [
+          ChildComponent,
+          childId => [
+            { childId },
+            childId > 10
+              ? { grandChild1: [GrandChildComponent, { id: "GC1" }] }
+              : { grandChild2: [GrandChildComponent, { id: "GC2" }] }
           ]
-        }
-      ]
-    }
+        ]
+      }
+    ]
   ]
 };
 
-describe("NSOAP Express", () => {
+ReactDOM.render(App);
+
+describe("NSOAP React", () => {
   it("Calls a parameter-less function", async () => {
     const app = makeApp();
     const resp = await request(app).get("/about");
     resp.text.should.equal("NSOAP Test Suite");
   });
 
-  it("Gets the value of a property", async () => {
-    const app = makeApp();
-    const resp = await request(app).get("/static");
-    resp.text.should.equal("NSOAP Static File");
-  });
-
   it("Calls a unary function", async () => {
     const app = makeApp();
-    const resp = await request(app).get("/unary(10)");
+    const resp = await request(app).get("/parent(10)");
     resp.body.should.equal(20);
   });
 

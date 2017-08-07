@@ -7,10 +7,16 @@ Attempting to explain it without code is futile. Let's go straight to the exampl
 Choose your framework
 
 <ul class="selector">
-  <li><a href="/">Express JS</a></li>
-  <li><a href="/koa.html">Koa JS</a></li>
-  <li><a href="/react.html">React JS</a></li>
+  <li><a href="https://github.com/nsoap-official/nsoap-express">Express JS</a></li>
+  <li><a href="https://github.com/nsoap-official/nsoap-koa">Koa JS</a></li>
+  <li><a href="https://github.com/nsoap-official/nsoap-react">React JS</a></li>
 </ul>
+
+## Installation
+
+```bash
+npm install nsoap-react
+```
 
 ## Initializing your App: The App Object
 
@@ -36,7 +42,7 @@ app.use(nsoap(myApp));
 
 ## Invoking Functions
 
-Invoke a function that adds two numbers looks like plain JavaScript.
+Invoking a function that adds two numbers looks like plain JavaScript.
 
 ```bash
 curl "http://www.example.com/addTwoNumbers(10,20)"
@@ -82,11 +88,11 @@ curl "http://www.example.com/findTodo(x)?x=
 
 ## Returning a response
 
-Applications are expected to return the response to be sent to the client.
+Handlers can return the value to be sent to the client. The router will take care of sending it as an HTTP Response.
 
 ```javascript
 const myApp = {
-  addTwoNumbers(x, y, { request, response }) {
+  addTwoNumbers(x, y) {
     return x + y;
   },
 }
@@ -96,7 +102,7 @@ In case there is an error, throw an exception.
 
 ```javascript
 const myApp = {
-  addTwoNumbers(x, y, { request, response }) {
+  addTwoNumbers(x, y) {
     if (typeof  x === "undefined" || typeof y === "undefined") {
       throw new Error("Invalid value.")
     } else {
@@ -108,13 +114,13 @@ const myApp = {
 
 ## On the server, use GET, POST, PUT whatever.
 
-Arguments passed via the query string need to be URI encoded. Arguments passed via HTTP method body are parsed with JSON.parse.
+NSOAP urls are callable via all HTTP methods. It is strongly suggested that methods are not restricted this way. However, if you do want to enforce HTTP methods on certain handlers, read the section Raw Request and Response Handling.
 
 ```bash
-# Using POST with JSON content type
+# Using GET
+curl "http://www.example.com/addTwoNumbers(10,20)"
+# Using POST
 curl -H "Content-Type: application/json" -X POST -d '{"x":10,"y":20}' "http://www.example.com/addTwoNumbers(x,y)"
-# Using POST with url encoding.
-curl --data "x=10&y=20" "http://www.example.com/addTwoNumbers(x,y)"
 ```
 
 ## Organizing code with Namespaces
@@ -185,6 +191,23 @@ const myApp = {
 
 const options = { index: "myDefaultFunc" }
 app.use(nsoap(myApp, options));
+```
+
+## Promises
+
+If the handler returns a Promise, the resolved value of the Promise is sent back as the response.
+
+```javascript
+const myApp = {
+  greeting() {
+    return Promise.resolve("Hello");
+  }
+}
+```
+
+```bash
+# Returns Hello
+curl "http://www.example.com/"
 ```
 
 ## Function Chaining
