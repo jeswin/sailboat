@@ -26,18 +26,30 @@ function wrap(_app, key) {
   const app = key ? { [key]: _app[key] } : _app;
   return Object.keys(app).reduce((acc, key) => {
     const handler = app[key];
-    acc[key] = () => {
-      
-    };
+    acc[key] = () => {};
     return acc;
   }, {});
+}
+
+function modifyHandler(current, key) {
+  const item = current[key];
+  return Array.isArray(item)
+    ? (() => {
+        const [Component, getPropsAndChildren] = item;
+        return () => {
+          const args = Array.prototype.slice.call(arguments);
+          const result = getPropsAndChildren ? getPropsAndChildren(args) : [];
+
+        }
+      })()
+    : 2;
 }
 
 export default function(app, options = {}) {
   const _urlPrefix = options.urlPrefix || "/";
   const urlPrefix = _urlPrefix.endsWith("/") ? _urlPrefix : `${urlPrefix}/`;
 
-  return req => {
+  return async req => {
     const { url, path, query } = req;
 
     if (path.startsWith(urlPrefix)) {
@@ -48,10 +60,12 @@ export default function(app, options = {}) {
 
       const createContext = options.createContext || (x => x);
       const context = options.appendContext
-        ? createContext({ req, res, isContext: () => true })
+        ? createContext({ req, isContext: () => true })
         : [];
 
-      nsoap(app, strippedPath, dicts, {});
+      const result = nsoap(app, strippedPath, dicts, {
+        modifyHandler
+      });
     } else {
       //Do the not found thing...
     }

@@ -77,20 +77,18 @@ const routesAlt = {
   about: <AboutPage title="About" />,
   parent: [
     ParentPage,
-    parentId => [
-      { parentId },
-      {
-        child: [
-          ChildComponent,
-          childId => [
-            { childId },
-            childId > 10
-              ? { grandChild1: [GrandChildComponent, { id: "GC1" }] }
-              : { grandChild2: [GrandChildComponent, { id: "GC2" }] }
-          ]
+    parentId => ({ parentId }),
+    {
+      child: [
+        ChildComponent,
+        childId => [
+          { childId },
+          childId > 10
+            ? { grandChild1: <GrandChildComponent id="GC1" /> }
+            : { grandChild2: <GrandChildComponent id="GC2" /> }
         ]
-      }
-    ]
+      ]
+    }
   ]
 };
 
