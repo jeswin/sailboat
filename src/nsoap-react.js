@@ -35,14 +35,14 @@ function modifyHandler(current, key) {
   const item = current[key];
   return Array.isArray(item)
     ? (() => {
-        const [Component, getPropsAndChildren] = item;
-        return () => {
+        const [[Component, getProps], children] = item;
+        const handler = () => {
           const args = Array.prototype.slice.call(arguments);
           const result = getPropsAndChildren ? getPropsAndChildren(args) : [];
-
-        }
+        };
+        return { [key]: handler }
       })()
-    : 2;
+    : (() => {})();
 }
 
 export default function(app, options = {}) {
@@ -67,7 +67,9 @@ export default function(app, options = {}) {
         modifyHandler
       });
     } else {
-      //Do the not found thing...
+      throw new Error(
+        `The url ${url} was not prefixed with ${prefix}. Skipped.`
+      );
     }
   };
 }

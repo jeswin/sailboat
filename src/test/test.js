@@ -15,6 +15,13 @@ const Template = ({ title, content, children }) =>
     {React.Children.count(children) ? children : <div />}
   </div>;
 
+const Home = (
+  <div>
+    <h1>Welcome to B29</h1>
+    <p>You are on the home page.</p>
+  </div>
+);
+
 const HomePage = props =>
   <Template title="Home Page" content="Welcome to NSOAP React" />;
 
@@ -76,8 +83,7 @@ const routesAlt = {
   index: <HomePage title="Home" />,
   about: <AboutPage title="About" />,
   parent: [
-    ParentPage,
-    parentId => ({ parentId }),
+    [ParentPage, parentId => ({ parentId })],
     {
       child: [
         ChildComponent,
