@@ -1,4 +1,5 @@
 import nsoap, { RoutingError } from "nsoap";
+import React, { Component } from "react";
 
 const identifierRegex = /^[a-zA-Z_$][a-zA-Z_$0-9]*$/;
 
@@ -22,36 +23,68 @@ function parseQuery(query) {
   return parseDict(query);
 }
 
-function wrap(_app, key) {
-  const app = key ? { [key]: _app[key] } : _app;
-  return Object.keys(app).reduce((acc, key) => {
-    const handler = app[key];
-    acc[key] = () => {};
-    return acc;
-  }, {});
+
+/*
+  This is the Higher Order Component (HOC) that acts as a wrapper 
+  for Components defined in various routes.
+*/
+class RouterComponent extends Component {
+
+  componentWillMount() {
+    router.push(this);
+    this.setState(state => ({ ...state, url: currentUrl }));
+  }
+
+  navigateTo(url) {
+    if (url !== this.state.url) {
+      this.setState(state => ({ ...state, url }));
+    }
+  }
+
+  render() {
+
+  }
+}
+
+/* 
+  Check if an item is a React Element or not.
+  React elements are "instantiated" <Components />
+*/
+function isElement(element) {
+  return React.isValidElement(element);
 }
 
 function modifyHandler(current, key) {
   const item = current[key];
-  return Array.isArray(item)
-    ? (() => {
-        const [[Component, getProps], children] = item;
-        const handler = () => {
-          const args = Array.prototype.slice.call(arguments);
-          const result = getPropsAndChildren ? getPropsAndChildren(args) : [];
-        };
-        return { [key]: handler }
-      })()
-    : (() => {})();
+  if (isElement(item)) {
+    return { [key]: item };
+  } else if (typeof item === "function") {
+    return {
+      [key]: async function() {
+        const args = Array.prototype.slice.call(arguments);
+        const result = await item.apply(current, args);
+        if (isElement(result)) {
+          return result;
+        } else {
+          const [Component, props, children] = result;
+          return {
+            index: <Component {...props} />,
+            ...children
+          };
+        }
+      }
+    };
+  }
 }
 
-export default function(app, options = {}) {
+export function Router(app, options = {}) {
   const _urlPrefix = options.urlPrefix || "/";
   const urlPrefix = _urlPrefix.endsWith("/") ? _urlPrefix : `${urlPrefix}/`;
 
-  return async req => {
+  async function handler(req) {
     const { url, path, query } = req;
 
+    //If the prefix is not correct, we don't need to do anything
     if (path.startsWith(urlPrefix)) {
       const strippedPath = path.substring(urlPrefix.length);
       const dicts = [
@@ -63,13 +96,17 @@ export default function(app, options = {}) {
         ? createContext({ req, isContext: () => true })
         : [];
 
-      const result = nsoap(app, strippedPath, dicts, {
+      const element = await nsoap(app, strippedPath, dicts, {
         modifyHandler
       });
-    } else {
-      throw new Error(
-        `The url ${url} was not prefixed with ${prefix}. Skipped.`
-      );
     }
-  };
+  }
+}
+
+let currentUrl;
+export function navigateTo(url) {
+  currentUrl = url;
+  for (const router of routers) {
+    router.navigateTo(url);
+  }
 }
