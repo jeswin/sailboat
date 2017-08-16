@@ -23,26 +23,26 @@ function parseQuery(query) {
   return parseDict(query);
 }
 
+const routerComponents = [];
 
 /*
   This is the Higher Order Component (HOC) that acts as a wrapper 
   for Components defined in various routes.
 */
 class RouterComponent extends Component {
-
   componentWillMount() {
-    router.push(this);
-    this.setState(state => ({ ...state, url: currentUrl }));
+    routerComponents.push(this);
+    this.setState(state => ({ ...state, component: currentComponent }));
   }
 
-  navigateTo(url) {
-    if (url !== this.state.url) {
-      this.setState(state => ({ ...state, url }));
+  setComponent(component) {
+    if (component !== this.state.component) {
+      this.setState(state => ({ ...state, component }));
     }
   }
 
   render() {
-
+    return this.state.component;
   }
 }
 
@@ -105,8 +105,5 @@ export function Router(app, options = {}) {
 
 let currentUrl;
 export function navigateTo(url) {
-  currentUrl = url;
-  for (const router of routers) {
-    router.navigateTo(url);
-  }
+  
 }
