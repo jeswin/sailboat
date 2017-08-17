@@ -1,8 +1,7 @@
 import React from "react";
-import should from "should";
-import { shallow } from "enzyme";
-import sinon from "sinon";
-import { expect } from "chai";
+import "should";
+import "should-enzyme";
+import { mount } from "enzyme";
 import "./dom";
 
 import { Router, navigateTo } from "../nsoap-react";
@@ -26,8 +25,8 @@ function makeApp() {
 describe("NSOAP React", () => {
   it("Renders the home page", async () => {
     const app = makeApp();
-    const wrapper = shallow(Router(app));
+    const wrapper = mount(Router(app));
     await navigateTo("/");
-    expect(wrapper.find("div")).to.have.length(1);
+    wrapper.find("h1").should.have.text("Home Page");
   });
 });
