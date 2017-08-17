@@ -103,7 +103,7 @@ export default class RouterHOC extends Component {
           : [];
 
         const element = await nsoap(this.props.app, strippedPath, dicts, {
-          index: "index",
+          index: this.props.options.index || "index",
           modifyHandler: this.streamHandler,
           onNextValue: this.onNextValue
         });
