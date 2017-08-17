@@ -4,14 +4,6 @@ import RouterHOC from "./router-hoc";
 
 let routers = [];
 
-/* 
-  Check if an item is a React Element or not.
-  React elements are "instantiated" <Components />
-*/
-function isElement(element) {
-  return React.isValidElement(element);
-}
-
 function onMount(router) {
   routers.push(router);
   if (currentUrl) {
@@ -26,7 +18,7 @@ function onUnmount(router) {
 
 export function Router(app, options = {}) {
   return (
-    <RouterHOC onMount={onMount} onUnmount={onUnmount} options={options} />
+    <RouterHOC app={app} onMount={onMount} onUnmount={onUnmount} options={options} />
   );
 }
 

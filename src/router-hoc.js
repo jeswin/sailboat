@@ -4,6 +4,7 @@
 */
 import React, { Component } from "react";
 import URL from "url-parse";
+import nsoap from "nsoap";
 
 const identifierRegex = /^[a-zA-Z_$][a-zA-Z_$0-9]*$/;
 
@@ -25,6 +26,14 @@ function parseDict(dict) {
 
 function parseQuery(query) {
   return parseDict(query);
+}
+
+/* 
+  Check if an item is a React Element or not.
+  React elements are "instantiated" <Components />
+*/
+function isElement(element) {
+  return React.isValidElement(element);
 }
 
 export default class RouterHOC extends Component {
@@ -75,8 +84,8 @@ export default class RouterHOC extends Component {
   }
 
   async navigateTo(url) {
-    const parsed = new URL(url);
-    const req = { url: parsed.url, path: parsed.pathname, query: parsed.searchParams };
+    const parsed = new URL(url, true);
+    const req = { url: parsed.url, path: parsed.pathname, query: parsed.query };
 
     if (url !== this.state.url) {
       //If the prefix is not correct, we don't need to do anything
@@ -85,7 +94,7 @@ export default class RouterHOC extends Component {
         const dicts = [
           this.props.options.parseQuery
             ? this.props.options.parseQuery(query)
-            : parseQuery(query)
+            : parseQuery(req.query)
         ];
 
         const createContext = this.props.options.createContext || (x => x);
@@ -93,11 +102,12 @@ export default class RouterHOC extends Component {
           ? createContext({ req, isContext: () => true })
           : [];
 
-        const element = await nsoap(app, strippedPath, dicts, {
+        const element = await nsoap(this.props.app, strippedPath, dicts, {
+          index: "index",
           modifyHandler: this.streamHandler,
           onNextValue: this.onNextValue
         });
-        debugger; 
+        debugger;
         this.setState(state => ({ ...state, element }));
       }
     }
