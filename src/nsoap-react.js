@@ -1,5 +1,8 @@
+import React from "react";
 import nsoap, { RoutingError } from "nsoap";
 import RouterHOC from "./router-hoc";
+
+let routers = [];
 
 /* 
   Check if an item is a React Element or not.
@@ -11,6 +14,9 @@ function isElement(element) {
 
 function onMount(router) {
   routers.push(router);
+  if (currentUrl) {
+    router.navigateTo(currentUrl);
+  }
 }
 
 function onUnmount(router) {
@@ -25,9 +31,9 @@ export function Router(app, options = {}) {
 }
 
 let currentUrl;
-export function navigateTo(url) {
+export async function navigateTo(url) {
   currentUrl = url;
   for (const router of routers) {
-    router.navigateTo(url);
+    await router.navigateTo(url);
   }
 }

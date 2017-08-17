@@ -4,23 +4,33 @@
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "dist/nsoap-react",
   "scripts": {
+    "build": "./build.sh",
     "test": "./build.sh && mocha --require source-map-support/register dist/test/test.js",
     "test-debug": "./build.sh && mocha --debug-brk --require source-map-support/register dist/test/test.js"
   },
   "license": "MIT",
   "dependencies": {
-    "nsoap": "^0.0.10"
+    "nsoap": "^0.0.10",
+    "react": "^15.6.1",
+    "url-parse": "^1.1.9"
   },
   "devDependencies": {
     "babel-loader": "*",
-    "babel-polyfill": "^6.23.0",
     "babel-plugin-transform-async-to-generator": "*",
+    "babel-polyfill": "^6.23.0",
     "babel-preset-es2015-without-regenerator": "^1.0.1",
     "babel-preset-es2016": "^6.24.1",
     "babel-preset-es2017": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
     "babel-preset-stage-3": "^6.24.1",
+    "chai": "^4.1.1",
+    "enzyme": "^2.9.1",
+    "jsdom": "^11.1.0",
     "mocha": "*",
+    "react-dom": "^15.6.1",
+    "react-test-renderer": "^15.6.1",
     "should": "*",
+    "sinon": "^3.2.0",
     "source-map-loader": "*",
     "source-map-support": "*"
   }

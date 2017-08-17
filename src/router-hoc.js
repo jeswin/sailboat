@@ -3,6 +3,7 @@
   for Components defined in various routes.
 */
 import React, { Component } from "react";
+import URL from "url-parse";
 
 const identifierRegex = /^[a-zA-Z_$][a-zA-Z_$0-9]*$/;
 
@@ -27,24 +28,19 @@ function parseQuery(query) {
 }
 
 export default class RouterHOC extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.streamHandler = this._streamHandler.bind(this);
     this.onNextValue = this._onNextValue.bind(this);
 
-    const _urlPrefix = options.urlPrefix || "/";
+    const _urlPrefix = this.props.options.urlPrefix || "/";
     const urlPrefix = _urlPrefix.endsWith("/") ? _urlPrefix : `${urlPrefix}/`;
     this.state = { urlPrefix };
   }
 
-  //If currentUrl was set before this instance was created/mounted,
-  //navigateTo it.
   componentWillMount() {
-    this.props.onMount(this)
-    if (currentUrl) {
-      this.navigateTo(currentUrl);
-    }
+    this.props.onMount(this);
   }
 
   componentWillUnmount() {
@@ -75,21 +71,25 @@ export default class RouterHOC extends Component {
   }
 
   _onNextValue(element) {
-    this.setState(state => ({ ...state, element }))
+    this.setState(state => ({ ...state, element }));
   }
 
   async navigateTo(url) {
-    const _ 
+    const parsed = new URL(url);
+    const req = { url: parsed.url, path: parsed.pathname, query: parsed.searchParams };
+
     if (url !== this.state.url) {
       //If the prefix is not correct, we don't need to do anything
-      if (path.startsWith(this.props.urlPrefix)) {
-        const strippedPath = path.substring(this.props.urlPrefix.length);
+      if (req.path.startsWith(this.state.urlPrefix)) {
+        const strippedPath = req.path.substring(this.state.urlPrefix.length);
         const dicts = [
-          options.parseQuery ? options.parseQuery(query) : parseQuery(query)
+          this.props.options.parseQuery
+            ? this.props.options.parseQuery(query)
+            : parseQuery(query)
         ];
 
-        const createContext = options.createContext || (x => x);
-        const context = options.appendContext
+        const createContext = this.props.options.createContext || (x => x);
+        const context = this.props.options.appendContext
           ? createContext({ req, isContext: () => true })
           : [];
 
@@ -97,13 +97,17 @@ export default class RouterHOC extends Component {
           modifyHandler: this.streamHandler,
           onNextValue: this.onNextValue
         });
-
-        this.setState(state => ({ ...state, element }))
+        debugger; 
+        this.setState(state => ({ ...state, element }));
       }
     }
   }
 
   render() {
-    return <div>{element}</div>
+    return (
+      <div>
+        {this.state.element}
+      </div>
+    );
   }
 }

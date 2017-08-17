@@ -1,4 +1,4 @@
 {
-    "presets": ["es2015-without-regenerator", "es2016", "es2017", "stage-3"],
+    "presets": ["es2015-without-regenerator", "es2016", "es2017", "stage-3", "react"],
     "plugins": ["transform-async-to-generator"]
 }

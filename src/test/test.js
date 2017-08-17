@@ -1,8 +1,17 @@
-import "./dom";
-import React from "react/addons";
+import React from "react";
 import should from "should";
+import { shallow } from "enzyme";
+import sinon from "sinon";
+import { expect } from "chai";
+import "./dom";
 
-const TestUtils = React.addons.TestUtils;
+import { Router, navigateTo } from "../nsoap-react";
+
+const HomePage = props =>
+  <div>
+    <h1>Home Page</h1>
+    <p>Welcome to B29!</p>
+  </div>;
 
 const routes = {
   index() {
@@ -10,9 +19,15 @@ const routes = {
   }
 };
 
+function makeApp() {
+  return { ...routes };
+}
 
 describe("NSOAP React", () => {
   it("Renders the home page", async () => {
-    ReactDOM.render(App);
+    const app = makeApp();
+    const wrapper = shallow(Router(app));
+    await navigateTo("/");
+    expect(wrapper.find("div")).to.have.length(1);
   });
 });
