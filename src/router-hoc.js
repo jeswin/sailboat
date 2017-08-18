@@ -36,6 +36,8 @@ function isElement(element) {
   return React.isValidElement(element);
 }
 
+const PARENT = new Symbol("ParentComponent");
+
 export default class RouterHOC extends Component {
   constructor(props) {
     super(props);
@@ -56,17 +58,27 @@ export default class RouterHOC extends Component {
     this.props.onUnmount(this);
   }
 
+  // renderTree(item, current) {
+  //   const ParentComponent = current[PARENT];
+  //   if (ParentComponent) {
+  //     return renderTree(
+  //       <ParentComponent
+  //     )
+  //   }
+  // }
+
   _streamHandler(current, key) {
+    const parent = current[PARENT];
     const item = current[key];
     if (isElement(item)) {
-      return { [key]: item };
+      return { [key]: renderTree(item, parent) };
     } else if (typeof item === "function") {
       return {
         [key]: async function() {
           const args = Array.prototype.slice.call(arguments);
           const result = await item.apply(current, args);
           if (isElement(result)) {
-            return result;
+            return renderTree(result, parent);
           } else {
             const [Component, props, children] = result;
             return {

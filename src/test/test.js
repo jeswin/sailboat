@@ -12,19 +12,71 @@ const HomePage = props =>
     <p>Welcome to B29!</p>
   </div>;
 
-
 const AboutPage = props =>
-<div>
-  <h1>About Page</h1>
-  <p>B29 can handle it.</p>
-</div>;
+  <div>
+    <h1>About Page</h1>
+    <p>B29 can handle it.</p>
+  </div>;
+
+const WithParamPage = props =>
+  <div>
+    <h1>
+      Parameter was {props.x}
+    </h1>
+  </div>;
+
+const TeamPage = props =>
+  <div>
+    <h1>
+      Team page for {props.teamName}
+    </h1>
+    {
+      this.props.children
+    }
+  </div>;
+
+const PlayerPage = props =>
+  <div>
+    <h2>
+      Player page for ${props.player.name}
+    </h2>
+  </div>;
+
+async function getTeamName(teamId) {
+  return `Team Number ${teamId}`;
+}
+
+async function getPlayer(jerseyNumber) {
+  return { name: `Miss ${jerseyNumber}`, gamesPlayed: 200 };
+}
 
 const routes = {
   index() {
     return <HomePage />;
   },
   about() {
-    return <AboutPage />
+    return <AboutPage />;
+  },
+  withParam(x) {
+    return <WithParamPage x={x} />;
+  },
+  team: async teamId => {
+    const teamName = await getTeamName(teamId);
+    return [
+      TeamPage,
+      { teamName },
+      {
+        //Child routes
+        player: jerseyNumber => [
+          PlayerComponent, //Component
+          { jerseyNumber }, //Props
+          {
+            //Child routes
+            game: gameId => [GameComponent, { gameId }]
+          }
+        ]
+      }
+    ];
   }
 };
 
@@ -45,5 +97,33 @@ describe("NSOAP React", () => {
     const wrapper = mount(Router(app));
     await navigateTo("/about");
     wrapper.find("h1").should.have.text("About Page");
+  });
+
+  it("Renders a route with a param", async () => {
+    const app = makeApp();
+    const wrapper = mount(Router(app));
+    await navigateTo("/withParam(666)");
+    wrapper.find("h1").should.have.text("Parameter was 666");
+  });
+
+  it("Renders a route with a param passed in querystring", async () => {
+    const app = makeApp();
+    const wrapper = mount(Router(app));
+    await navigateTo("/withParam(x)?x=666");
+    wrapper.find("h1").should.have.text("Parameter was 666");
+  });
+
+  it("Renders async route", async () => {
+    const app = makeApp();
+    const wrapper = mount(Router(app));
+    await navigateTo("/team(100)");
+    wrapper.find("h1").should.have.text("Team page for Team Number 100");
+  });
+
+  it("Renders an child route", async () => {
+    const app = makeApp();
+    const wrapper = mount(Router(app));
+    await navigateTo("/team(100)");
+    wrapper.find("h1").should.have.text("Team page for Team Number 100");
   });
 });
