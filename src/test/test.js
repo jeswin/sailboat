@@ -30,15 +30,15 @@ const TeamPage = props =>
     <h1>
       Team page for {props.teamName}
     </h1>
-    {
-      this.props.children
-    }
+    <div>
+      {props.children}
+    </div>
   </div>;
 
-const PlayerPage = props =>
+const PlayerComponent = props =>
   <div>
     <h2>
-      Player page for ${props.player.name}
+      Player details for ${props.player.name}
     </h2>
   </div>;
 
@@ -117,13 +117,14 @@ describe("NSOAP React", () => {
     const app = makeApp();
     const wrapper = mount(Router(app));
     await navigateTo("/team(100)");
+    console.log(wrapper.html())
     wrapper.find("h1").should.have.text("Team page for Team Number 100");
   });
 
   it("Renders an child route", async () => {
     const app = makeApp();
     const wrapper = mount(Router(app));
-    await navigateTo("/team(100)");
+    await navigateTo("/team(100).player(10)");
     wrapper.find("h1").should.have.text("Team page for Team Number 100");
   });
 });
