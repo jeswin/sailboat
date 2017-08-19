@@ -1,8 +1,8 @@
 {
-  "name": "nsoap-react",
+  "name": "sailboat",
   "version": "0.0.1",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
-  "main": "dist/nsoap-react",
+  "main": "dist/sailboat",
   "scripts": {
     "build": "./build.sh",
     "test": "./build.sh && mocha --require source-map-support/register dist/test/test.js",

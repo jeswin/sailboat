@@ -4,7 +4,7 @@ import "should-enzyme";
 import { mount } from "enzyme";
 import "./dom";
 
-import { Router, reset, navigateTo } from "../nsoap-react";
+import { Router, reset, navigateTo } from "../sailboat";
 
 const HomePage = props =>
   <div>
