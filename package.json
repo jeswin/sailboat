@@ -10,7 +10,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "nsoap": "^0.0.11",
+    "nsoap": "^0.0.13",
     "react": "^15.6.1",
     "should-enzyme": "^1.4.0",
     "url-parse": "^1.1.9"

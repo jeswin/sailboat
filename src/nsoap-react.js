@@ -4,6 +4,11 @@ import RouterHOC from "./router-hoc";
 
 let routers = [];
 
+export function reset() {
+  currentUrl = undefined;
+  routers = [];
+}
+
 function onMount(router) {
   routers.push(router);
   if (currentUrl) {
@@ -18,7 +23,12 @@ function onUnmount(router) {
 
 export function Router(app, options = {}) {
   return (
-    <RouterHOC app={app} onMount={onMount} onUnmount={onUnmount} options={options} />
+    <RouterHOC
+      app={app}
+      onMount={onMount}
+      onUnmount={onUnmount}
+      options={options}
+    />
   );
 }
 

@@ -4,7 +4,7 @@ import "should-enzyme";
 import { mount } from "enzyme";
 import "./dom";
 
-import { Router, navigateTo } from "../nsoap-react";
+import { Router, reset, navigateTo } from "../nsoap-react";
 
 const HomePage = props =>
   <div>
@@ -38,8 +38,18 @@ const TeamPage = props =>
 const PlayerComponent = props =>
   <div>
     <h2>
-      Player details for ${props.player.name}
+      Player details for {props.player.name}
     </h2>
+    <div>
+      {props.children}
+    </div>
+  </div>;
+
+const GameComponent = props =>
+  <div>
+    <h3>
+      Played game number {props.gameId}
+    </h3>
   </div>;
 
 async function getTeamName(teamId) {
@@ -60,21 +70,22 @@ const routes = {
   withParam(x) {
     return <WithParamPage x={x} />;
   },
-  team: async teamId => {
+  async team(teamId) {
     const teamName = await getTeamName(teamId);
     return [
       TeamPage,
       { teamName },
       {
-        //Child routes
-        player: jerseyNumber => [
-          PlayerComponent, //Component
-          { jerseyNumber }, //Props
-          {
-            //Child routes
-            game: gameId => [GameComponent, { gameId }]
-          }
-        ]
+        async player(jerseyNumber) {
+          const player = await getPlayer(jerseyNumber);
+          return [
+            PlayerComponent,
+            { player },
+            {
+              game: gameId => [GameComponent, { gameId }]
+            }
+          ];
+        }
       }
     ];
   }
@@ -84,47 +95,57 @@ function makeApp() {
   return { ...routes };
 }
 
-describe("NSOAP React", () => {
+async function withWrapper(url, fn, options) {
+  const app = makeApp(options);
+  const wrapper = mount(Router(app));
+  await navigateTo(url);
+  await fn(wrapper);
+  reset();
+}
+
+describe("NSOAP React", async () => {
   it("Renders the home page", async () => {
-    const app = makeApp();
-    const wrapper = mount(Router(app));
-    await navigateTo("/");
-    wrapper.find("h1").should.have.text("Home Page");
+    await withWrapper("/", wrapper => {
+      wrapper.find("h1").should.have.text("Home Page");
+    });
   });
 
   it("Renders a url", async () => {
-    const app = makeApp();
-    const wrapper = mount(Router(app));
-    await navigateTo("/about");
-    wrapper.find("h1").should.have.text("About Page");
+    await withWrapper("/about", wrapper => {
+      wrapper.find("h1").should.have.text("About Page");
+    });
   });
 
   it("Renders a route with a param", async () => {
-    const app = makeApp();
-    const wrapper = mount(Router(app));
-    await navigateTo("/withParam(666)");
-    wrapper.find("h1").should.have.text("Parameter was 666");
+    await withWrapper("/withParam(666)", wrapper => {
+      wrapper.find("h1").should.have.text("Parameter was 666");
+    });
   });
 
   it("Renders a route with a param passed in querystring", async () => {
-    const app = makeApp();
-    const wrapper = mount(Router(app));
-    await navigateTo("/withParam(x)?x=666");
-    wrapper.find("h1").should.have.text("Parameter was 666");
+    await withWrapper("/withParam(x)?x=666", wrapper => {
+      wrapper.find("h1").should.have.text("Parameter was 666");
+    });
   });
 
   it("Renders async route", async () => {
-    const app = makeApp();
-    const wrapper = mount(Router(app));
-    await navigateTo("/team(100)");
-    console.log(wrapper.html())
-    wrapper.find("h1").should.have.text("Team page for Team Number 100");
+    await withWrapper("/team(100)", wrapper => {
+      wrapper.find("h1").should.have.text("Team page for Team Number 100");
+    });
   });
 
   it("Renders an child route", async () => {
-    const app = makeApp();
-    const wrapper = mount(Router(app));
-    await navigateTo("/team(100).player(10)");
-    wrapper.find("h1").should.have.text("Team page for Team Number 100");
+    await withWrapper("/team(100).player(10)", wrapper => {
+      wrapper.find("h1").should.have.text("Team page for Team Number 100");
+      wrapper.find("h2").should.have.text("Player details for Miss 10");
+    });
+  });
+
+  it("Renders an grand-child route", async () => {
+    await withWrapper("/team(100).player(10).game(1)", wrapper => {
+      wrapper.find("h1").should.have.text("Team page for Team Number 100");
+      wrapper.find("h2").should.have.text("Player details for Miss 10");
+      wrapper.find("h3").should.have.text("Played game number 1");
+    });
   });
 });

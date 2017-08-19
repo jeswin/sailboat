@@ -1,7 +1,3 @@
-/*
-  This is the Higher Order Component (HOC) that acts as a wrapper 
-  for Components defined in various routes.
-*/
 import React, { Component } from "react";
 import URL from "url-parse";
 import nsoap from "nsoap";
@@ -39,19 +35,16 @@ function isElement(element) {
 const PARENT = Symbol("Parent");
 const COMPONENT = Symbol("Component");
 
-function renderTree(item, current, acc) {
-  const parentComponent = current[COMPONENT];
-  if (parentComponent) {
-    const [ParentComponent, parentProps] = parentComponent;
-    //console.log("PPP>>>", ParentComponent, "....", item)
-    return renderTree(
-      <ParentComponent {...parentProps}>
-        {item}
-      </ParentComponent>,
-      current[PARENT]
-    );
+function renderTree(item, current) {
+  if (current[COMPONENT]) {
+    const [ParentComponent, parentProps] = current[COMPONENT];
+    const rendered = item
+      ? <ParentComponent {...parentProps}>
+          {item}
+        </ParentComponent>
+      : <ParentComponent {...parentProps} />;
+    return current[PARENT] ? renderTree(rendered, current[PARENT]) : rendered;
   } else {
-    //console.log("This is the end....", item)
     return item;
   }
 }
@@ -76,10 +69,13 @@ export default class RouterHOC extends Component {
     this.props.onUnmount(this);
   }
 
-  _traverse(current, key) {
+  _traverse(key, current) {
+    debugger;
+    const index = (this.props.options && this.props.options.index) || "index";
+
     const item = current[key];
     if (isElement(item)) {
-      return { [key]: renderTree(item, current) };
+      return { [key]: () => renderTree(item, current) };
     } else {
       return {
         [key]: async function() {
@@ -87,16 +83,17 @@ export default class RouterHOC extends Component {
             typeof item === "function"
               ? await item.apply(current, arguments)
               : item;
-          if (isElement(result)) {
+
+          if (typeof result === "undefined" || isElement(result)) {
             return renderTree(result, current);
           } else {
             const [Component, props, children] = result;
-            return {
-              index: () => renderTree(<Component {...props} />, current),
-              ...children,
+            const val = {
+              [index]: () => undefined,
               [PARENT]: current,
               [COMPONENT]: [Component, props]
             };
+            return children ? { ...val, ...children } : val;
           }
         }
       };
@@ -104,7 +101,7 @@ export default class RouterHOC extends Component {
   }
 
   _onNextValue(element) {
-    this.setState(state => ({ ...state, element }));
+    //this.setState(state => ({ ...state, element }));
   }
 
   async navigateTo(url) {
@@ -138,7 +135,7 @@ export default class RouterHOC extends Component {
 
   render() {
     return (
-      <div>
+      <div className="__nsoap_router_container__">
         {this.state.element}
       </div>
     );
