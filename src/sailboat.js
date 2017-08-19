@@ -9,27 +9,16 @@ export function reset() {
   routers = [];
 }
 
-function onMount(router) {
+export function load(router) {
   routers.push(router);
   if (currentUrl) {
     router.navigateTo(currentUrl);
   }
 }
 
-function onUnmount(router) {
-  const index = routers.findIndex(i => i === this);
+export function unload(router) {
+  const index = routers.findIndex(i => i === router);
   routers.splice(index, 1);
-}
-
-export function Router(app, options = {}) {
-  return (
-    <RouterHOC
-      app={app}
-      onMount={onMount}
-      onUnmount={onUnmount}
-      options={options}
-    />
-  );
 }
 
 let currentUrl;
@@ -38,4 +27,15 @@ export async function navigateTo(url) {
   for (const router of routers) {
     await router.navigateTo(url);
   }
+}
+
+export function Router(app, options = {}) {
+  return (
+    <RouterHOC
+      app={app}
+      onMount={load}
+      onUnmount={unload}
+      options={options}
+    />
+  );
 }

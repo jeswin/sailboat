@@ -100,8 +100,8 @@ export default class RouterHOC extends Component {
     }
   }
 
-  _onNextValue(element) {
-    //this.setState(state => ({ ...state, element }));
+  _onNextValue(element, current) {
+    this.setState(state => ({ state, element: renderTree(element, current) }));
   }
 
   async navigateTo(url) {
