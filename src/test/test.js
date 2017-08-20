@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import React from "react";
 import "should";
 import "should-enzyme";
@@ -189,7 +190,11 @@ describe("NSOAP React", async () => {
     const app = { ...routes };
     const wrapper = mount(Router(app));
     signal = new Promise(async (resolve, reject) => {
-      await navigateTo("/streaming");
+      try {
+        await navigateTo("/streaming");
+      } catch (ex) {
+        console.log("EXX", ex);
+      }
       console.log("GOTTYA");
       console.log(wrapper.html());
       //wrapper.find("h1").should.have.text("Stream 1");
