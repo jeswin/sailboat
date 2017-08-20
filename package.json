@@ -1,6 +1,6 @@
 {
   "name": "sailboat",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "dist/sailboat",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "nsoap": "^0.0.14",
+    "nsoap": "^0.0.15",
     "react": "^15.6.1",
     "url-parse": "^1.1.9"
   },

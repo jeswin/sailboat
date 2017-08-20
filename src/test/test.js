@@ -155,7 +155,7 @@ function makeApp() {
 
 async function withWrapper(url, fn, options) {
   const app = makeApp(options);
-  const wrapper = mount(Router(app));
+  const wrapper = mount(Router(app, options));
   await navigateTo(url);
   await fn(wrapper);
 }
@@ -202,6 +202,13 @@ describe("NSOAP React", async () => {
       wrapper.find("h1").should.have.text("Team page for Team Number 100");
       wrapper.find("h2").should.have.text("Player details for Miss 10");
     });
+  });
+
+  it("Can use slash instead of dot", async () => {
+    await withWrapper("/team(100)/player(10)", wrapper => {
+      wrapper.find("h1").should.have.text("Team page for Team Number 100");
+      wrapper.find("h2").should.have.text("Player details for Miss 10");
+    }, { useSlash: true });
   });
 
   it("Renders an grand-child route", async () => {
