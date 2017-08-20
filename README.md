@@ -323,9 +323,10 @@ const myRoutes = {
 };
 
 router.get("*", (req, res) => {
-  navigateTo(req.url);
-  const content = ReactDOMServer.renderToString(Router(myRoutes));
-  res.render("index", { title: "Sailboat", data: false, content });
+  navigateTo(req.url).then(() => {
+    const content = ReactDOMServer.renderToString(Router(myRoutes));
+    res.render("index", { title: "Sail", data: false, content });
+  });
 });
 ```
 
