@@ -12,7 +12,6 @@
   "dependencies": {
     "nsoap": "^0.0.14",
     "react": "^15.6.1",
-    "should-enzyme": "^1.4.0",
     "url-parse": "^1.1.9"
   },
   "devDependencies": {
@@ -31,6 +30,7 @@
     "react-dom": "^15.6.1",
     "react-test-renderer": "^15.6.1",
     "should": "*",
+    "should-enzyme": "^1.4.0",
     "source-map-loader": "*",
     "source-map-support": "*"
   }
