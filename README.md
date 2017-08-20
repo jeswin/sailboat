@@ -72,13 +72,13 @@ const myRoutes = {
 
 Alright, so that was NSOAP in a nutshell. To read more, see the documentation for [NSOAP Express Router](https://github.com/nsoap-official/nsoap-express). Let’s get started with the official NSOAP Router for React — Sailboat.
 
-## Getting Started
+## Installation
 
 Install Sailboat from npm.
 
     npm install sailboat
 
-## Routing for React
+## Getting Started
 
 In the previous examples, route handlers were returning strings or numbers as the result. Routing for React is simple; simply return React UI components from handlers.
 
