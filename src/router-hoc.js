@@ -33,16 +33,16 @@ function isElement(element) {
 }
 
 function isIterable(gen) {
-  return gen.next && typeof gen.next === "function";
+  return typeof gen !== "undefined" && gen.next && typeof gen.next === "function";
 }
 
-async function* iterate(gen) {
+async function* iterateToEnd(gen) {
   while (true) {
-    const result = await gen.next();
-    if (result.done) {
-      return result.value;
+    const genResult = await gen.next();
+    if (genResult.done) {
+      return genResult.value;
     } else {
-      yield result.value;
+      yield genResult.value;
     }
   }
 }
@@ -89,38 +89,27 @@ export default class RouterHOC extends Component {
 
     const item = current[key];
     if (isElement(item)) {
-      return { [key]: () => renderTree(item, current) };
+      return {
+        [key]: () => renderTree(item, current),
+        [PARENT]: current[PARENT],
+        [COMPONENT]: current[COMPONENT]
+      };
     } else {
       return {
         [key]: async function*() {
-          const result =
+          const resultOrIterable =
             typeof item === "function"
               ? await item.apply(current, arguments)
               : item;
 
+          const result = isIterable(resultOrIterable)
+            ? yield* iterateToEnd(resultOrIterable)
+            : resultOrIterable;
+
           if (typeof result === "undefined" || isElement(result)) {
             return renderTree(result, current);
           } else {
-            let Component, props, children;
-            if (isIterable(result)) {
-              while (true) {
-                const genResult = await result.next();
-                if (genResult.done) {
-                  const genValue = genResult.value;
-                  if (isElement(genValue)) {
-                    return renderTree(genValue, current);
-                  } else {
-                    [Component, props, children] = genResult.value;
-                    break;
-                  }
-                } else {
-                  yield genResult.value;
-                }
-              }
-            } else {
-              [Component, props, children] = result;
-            }
-
+            const [Component, props, children] = result;
             const val = {
               [index]: () => undefined,
               [PARENT]: current,
@@ -129,14 +118,16 @@ export default class RouterHOC extends Component {
 
             return children ? { ...val, ...children } : val;
           }
-        }
+        },
+        [PARENT]: current[PARENT],
+        [COMPONENT]: current[COMPONENT]
       };
     }
   }
 
-  _onNextValue(element, current) {
-    console.log("GOTTYA");
-    this.setState(state => ({ state, element: renderTree(element, current) }));
+  _onNextValue(childElement, current) {
+    const element = renderTree(childElement, current)
+    this.setState(state => ({ state, element }));
   }
 
   async navigateTo(url) {

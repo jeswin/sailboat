@@ -1,6 +1,6 @@
 {
   "name": "sailboat",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "dist/sailboat",
   "scripts": {
@@ -10,12 +10,13 @@
   },
   "license": "MIT",
   "dependencies": {
-    "nsoap": "^0.0.13",
+    "nsoap": "^0.0.14",
     "react": "^15.6.1",
     "should-enzyme": "^1.4.0",
     "url-parse": "^1.1.9"
   },
   "devDependencies": {
+    "await-signal": "^0.1.2",
     "babel-loader": "*",
     "babel-plugin-transform-async-to-generator": "*",
     "babel-polyfill": "^6.23.0",
