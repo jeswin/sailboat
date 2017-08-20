@@ -340,6 +340,14 @@ Sailboat differs from React Router (and most others) by its use of NSOAP as the 
 
 Sure you can. Left as an exercise to the reader.
 
+### Don’t like the dot notation?
+You can use "/" instead of "." while accessing object properties by setting the useSlash option. This allows you to access the url "/team.player.game" as "/team/player/game".
+
+```javascript
+//omitted for brevity
+ReactDOM.render(Router(myApp, { useSlash: true }), mountNode);
+```
+
 ## Browser History
 
 Use HTML5 APIs.
