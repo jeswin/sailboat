@@ -1,7 +1,7 @@
 
 # Sailboat: A modern Router for React
 
-
+![Streaming UI](https://cdn-images-1.medium.com/max/1200/1*__f50t1EhLRYArM-OIpLOQ.gif)
 
 Summary of features:
 
