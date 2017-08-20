@@ -1,554 +1,348 @@
-# NSOAP: Native Syntax Object Access Protocol
 
-NSOAP is a Remote Procedure Call (RPC) and URL convention that uses familiar JavaScript syntax for method invocation and parameter passing. In addition to web services, NSOAP conventions can also be used for client-side routing in React, Angular etc. The NSOAP project provides routers for Express, Koa and React. Contributions are invited for other frameworks and languages.  
+# Sailboat: A modern Router for React
 
-Attempting to explain it without code is futile. Let's go straight to the examples.
 
-Choose your framework
 
-<ul class="selector">
-  <li><a href="https://github.com/nsoap-official/nsoap-express">Express JS</a></li>
-  <li><a href="https://github.com/nsoap-official/nsoap-koa">Koa JS</a></li>
-  <li><a href="https://github.com/nsoap-official/nsoap-react">React JS</a></li>
-</ul>
+Summary of features:
 
-## Installation
+* Streaming UI Components (via generators)
 
-```bash
-npm install nsoap-react
-```
+* Async route handling
 
-## Initializing your App: The App Object
+* Easy integration with Redux, MobX and the like
 
-The App Object (myApp in the following example) contains the "routes" the application will respond to.
+* Server-side Rendering
 
-```javascript
-const express = require("express");
-const nsoap = require("nsoap-express");
+* Powerful nested routes
 
-const app = express();
+* Avoid re-implementing features which already exist in HTML/JS
 
-const myApp = {
-  addTwoNumbers(x, y) {
-    return x + y;
-  },
-  sayHello(name) {
-    return `Hello ${name}!`
-  }
-}
+* Minimal learning curve
 
-app.use(nsoap(myApp));
-```
+## NSOAP — A Routing Convention for JavaScript
 
-## Invoking Functions
+One of the big lessons from the success of React is that sticking close to the underlying programming language makes a framework way more powerful than otherwise, while remaining easy to learn. NSOAP (Native Syntax Object Access Protocol) takes this lesson to heart; and defines a URL convention for accesssing JavaScript methods and objects locally (client-side routing) or remotely (server-side routing).
+> If you know JavaScript, you already know the NSOAP convention.
 
-Invoking a function that adds two numbers looks like plain JavaScript.
-
-```bash
-curl "http://www.example.com/addTwoNumbers(10,20)"
-```
-
-Arguments can be strings, numbers or booleans. If they are strings, they must still be valid JavaScript identifiers.
-
-```bash
-# numeric argument
-curl "http://www.example.com/addTwoNumbers(10,20)"
-# boolean argument
-curl "http://www.example.com/findAll(true)"
-# string argument
-curl "http://www.example.com/search(thomas)"
-```
-
-Use parameters.
-
-```bash
-# numeric
-curl "http://www.example.com/addTwoNumbers(x,y)?x=10&y=20"
-# string
-curl "http://www.example.com/search(x)?x=thomas"
-```
-
-If the argument is a string and it contains spaces or other characters, you will need to quote and encode them. They can only be passed via parameter variables.
-
-```bash
-# Have spaces? Must quote and encode.
-# %22 is double quote, %20 is space
-# x = "thomas jacob"
-curl "http://www.example.com/search(x)?x=%22thomas%20jacob%22"
-```
-
-You may pass full JSON objects via parameter variables.
-
-```bash
-# x = { "title": "bring milk", "assignee": "me" })
-# encodeURIComponent(x)
-curl "http://www.example.com/findTodo(x)?x=
-%7B%20%22title%22%3A%20%22bring%20milk%22%2C%20%22assignee%22%3A%20%22me%22%20%7D"
-```
-
-## Returning a response
-
-Handlers can return the value to be sent to the client. The router will take care of sending it as an HTTP Response.
+Let’s look at a basic example for NSOAP in action for server-side routing.
 
 ```javascript
-const myApp = {
-  addTwoNumbers(x, y) {
-    return x + y;
-  },
-}
-```
-
-In case there is an error, throw an exception.
-
-```javascript
-const myApp = {
-  addTwoNumbers(x, y) {
-    if (typeof  x === "undefined" || typeof y === "undefined") {
-      throw new Error("Invalid value.")
-    } else {
-      return x + y;
-    }
-  },
-}
-```
-
-## On the server, use GET, POST, PUT whatever.
-
-NSOAP urls are callable via all HTTP methods. It is strongly suggested that methods are not restricted this way. However, if you do want to enforce HTTP methods on certain handlers, read the section Raw Request and Response Handling.
-
-```bash
-# Using GET
-curl "http://www.example.com/addTwoNumbers(10,20)"
-# Using POST
-curl -H "Content-Type: application/json" -X POST -d '{"x":10,"y":20}' "http://www.example.com/addTwoNumbers(x,y)"
-```
-
-## Organizing code with Namespaces
-
-Invoke a function defined on an object. This allows organizing the code into namespaces similar to directories.
-
-```javascript
-const myApp = {
+//Consider the simple web service below
+const myRoutes = {  
+  greet(name) => `Hello ${name}`,
   math: {
-    square(x) {
-      return x * x;
-    }
-  }
-}
-```
-
-```bash
-curl "http://www.example.com/math.square(20)"
-# OR
-curl "http://www.example.com/math.square(x)?x=20"
-# returns 400
-```
-
-## Optional Parenthesis
-
-Parenthesis may be omitted if the function can be called without arguments.
-
-```javascript
-const myApp = {
-  default() {
-    return "Hello";
-  }
-}
-```
-
-```bash
-curl "http://www.example.com/default"
-# is the same as
-curl http://www.example.com/default()
-```
-
-## Default Functions
-
-Applications can specify the default function to be called when the url omits the function name.
-The default is "index".
-
-```javascript
-const myApp = {
-  index() {
-    return "Hello";
-  }
-}
-```
-
-```bash
-# Assuming that the default function name has not been changed
-curl "http://www.example.com/"
-```
-
-To specify an alternate default function, use options while creating the router.
-
-```javascript
-const myApp = {
-  myDefaultFunc() {
-    return "Hello";
-  }
+    sum(a, b) => a + b,
+    zero: 0,
+    asyncSum(a, b) => Promise.resolve(a + b)
+  },
 }
 
-const options = { index: "myDefaultFunc" }
-app.use(nsoap(myApp, options));
+
+/*
+  NSOAP routes for this service will look like this:
+  /greet(jes) returns "Hello jes"
+  /math.sum(10,20) returns 30
+  /math.zero returns 0
+  /math.asyncSum(10,20) also returns 30
+*/
 ```
 
-## Promises
-
-If the handler returns a Promise, the resolved value of the Promise is sent back as the response.
+Since it’s just JavaScript, you can do interesting things like chained routes.
 
 ```javascript
-const myApp = {
-  greeting() {
-    return Promise.resolve("Hello");
-  }
-}
-```
-
-```bash
-# Returns Hello
-curl "http://www.example.com/"
-```
-
-## Function Chaining
-
-Chained function calls work the same way you expect it to work. The following url invokes the getAccounts function on the result of the getCustomer function. If the function returns a Promise (or a Future), the Promise is resolved and the subsequent function or object is accessed on the resolved value.
-
-```bash
-curl "http://www.example.com/getCustomer(100).getAccounts(2017)"
-#OR
-curl "http://www.example.com/getCustomer(custId).getAccounts(year)?custId=100&year=2017"
-```
-
-## Parameter Type Inference
-
-NSOAP supports parameter type inference for strings, numbers and booleans. In the following example, the function parameters are inferred as string, number, boolean and number.
-
-```bash
-curl "http://www.example.com/search(Jeswin,20,true,x)?x=100"
-```
-
-## Case-sensitivity
-
-NSOAP parameter parsing is case-sensitive. So the following will not assign 100 to the parameter 'x'.
-
-```bash
-# Error. 'x' is not the same as 'X'
-curl "http://www.example.com/squareRoot(x)?X=100"
-```
-
-## Advanced Default Functions
-
-If the return value is an object, and it contains a property with the same name as the default function name, and if the value of the property is a function, it is invoked.
-
-That may sound confusing, let's look at an example. Assume that the default function name is unchanged (ie, "index"). The addTwoNumbers() function returns an object with a property named "index" which is a function. Since it matches the default function name, it is invoked.
-
-```javascript
-// The app
-const myApp = {
-  addTwoNumbers(x, y) {
+const myRoutes = {
+  async getCustomer(id) {
+    const customer = await getCustomerFromDatabase(id);
     return {
-      index() {
-        return x + y;
-      }
+      index: customer,
+      async details() {
+        const customerDetails = await customer.getDetails(id);
+        return customerDetails;
+      } 
     }
-  },
-}
+  }
+};
+
+/*
+  NSOAP URLs:
+  /getCustomer(100) returns a customer object
+  /getCustomer(100).details returns customer details
+*/
 ```
 
-```bash
-curl "http://www.example.com/addTwoNumbers(10,20)"
-# returns 30
-```
+Alright, so that was NSOAP in a nutshell. To read more, see the documentation for [NSOAP Express Router](https://github.com/nsoap-official/nsoap-express). Let’s get started with the official NSOAP Router for React — Sailboat.
 
-This allows for more powerful chained functions. The following app can now respond to the urls /getCustomer(1) and /getCustomer(1).getTotalPurchases()
+## Getting Started
+
+Install Sailboat from npm.
+
+    npm install sailboat
+
+## Routing for React
+
+In the previous examples, route handlers were returning strings or numbers as the result. Routing for React is simple; simply return React UI components from handlers.
+
+Let’s start with a home page, which sits at the url “/”.
 
 ```javascript
-// The app
+import React from "react";
+import { Router, navigateTo } from "sailboat";
+
+const Home = (
+  <div>
+    <h1>Welcome to Sailboat</h1>
+    <p>You are on the home page.</p>
+  </div>
+);
+
 const myApp = {
-  getCustomer(id) {
-    return {
-      index() {
-        return id === 1 ? { name: "Jeswin" } : { name: "Thomas" }
-      },
-      totals() {
-        return id === 1 ? 100 : 200;
-      }
-    }
-  },
+  index: <HomePage />
 }
+
+//Load the home page when rendered.
+navigateTo("/");
+
+ReactDOM.render(Router(myApp), mountNode);
 ```
 
-```bash
-# will return { name: "Jeswin" }
-curl "http://www.example.com/getCustomer(1)"
+Ok, that was simple. Let’s now build a page which displays the sum of two numbers passed via a url. According to the NSOAP convention, your url is going to look like “/sum(10,20)”. Or if you want to use parameters, you could use “/sum(x,y)?x=10&y=20”.
 
-# will return 100
-curl "http://www.example.com/getCustomer(1).totals"
+We’ll also introduce here a component called Link, which navigates to the url when clicked. It renders an Anchor tag with its click handler invoking the navigateTo function seen previously, and sets the url in the browser’s address bar.
+
+```javascript
+import { Router, navigateTo } from "sailboat";
+
+const Link => props => (
+  <a href="#" onClick={() => navigateTo(props.url)}>
+    {props.children}
+  </a>
+);
+
+const HomePage = props => (
+  <div>
+    <p>
+      <Link href="/sum(10,20)">
+        Sum of 10 and 20
+      </Link>
+    </p>
+  </div>
+);
+
+const Sum = props => (
+  <div>Sum is `${props.a + props.b}`</div>
+)
+
+const myApp = {
+  index: <HomePage />,
+  sum: (a,b) => <Sum a={a} b={b} />
+}
+
+ReactDOM.render(Router(myApp), mountNode);
 ```
 
-## Raw Request and Response Handling
+That wasn’t so hard either. Let’s see how we can build more complex UIs. We’re going to introduce an alternate syntax for declaring Routes. It makes our routing more expressive.
 
-Sometimes, you might want to access the request and response objects directly. You could do that by returning a function as the result. In the following example, the handler 'getCustomerName' has full access to the request and response objects.  
+```javascript
+//This...
+const myApp = {
+  index: <HomePage />,
+  sum: (a,b) => <Sum a={a} b={b} />
+}
+
+//... is the same as
+const myApp = {
+  index: () => [HomePage],
+  sum: (a, b) => [Sum, { a, b }]
+};
+
+ReactDOM.render(Router(myApp), mountNode);
+```
+
+What’s this good for? Child Routes. Read on.
+
+## Child Routes
+
+Let’s now bring some real-world complexity into our routing. Our goal is to define these three routes.
+
+1. /team(teamId) — *returns the TeamPage component*
+
+1. /team(teamId).player(jerseyNumber) — *returns PlayerComponent inside TeamPage*
+
+1. /team(teamId).player(jerseyNumber).game(gameId) — *returns GameComponent inside PlayerComponent inside TeamPage*
+
+Parent routes like /team(10) should be callable on their own, as well as along with child-components. eg: /team(10).player(2).game(23)
+
+Sailboat has a short-hand syntax for this:
 
 ```javascript
 const myApp = {
-  getCustomerName(id) {
-    return (req, res) => {
-      res.send(id === 1 ? "Jeswin" : "Thomas")
-    }
-  },
-}
-```
-
-```bash
-# will return "Jeswin"
-curl "http://www.example.com/getCustomerName(1)"
-```
-
-## HTTP Headers and Cookies
-
-Values defined in HTTP Headers and Cookies are given the same treatment as values passed via querystring or the body. They key is taken as the parameter name and the corresponding value is assigned.
-
-```bash
-# returns 400
-curl --header "x:20" "http://www.example.com/math.square(x)"
-```
-
-## Security
-
-NSOAP is HTTP method agnostic. This means that a method can be called via GET, POST or whatever. If you wish to allow only specific HTTP methods, you need to use Raw Request and Response Handling.
-
-```javascript
-const myApp = {
-  greeting(id) {
-    return (req, res) => {
-      if (req.method === "POST") {
-        res.send("Hello")
-      } else {
-        res.status(404).send("Sorry, nothing to see here.")
-      }
-    }
-  },
-}
-```
-
-Be careful with Cookies. Ensure that you are protected against CSRF vulnerabilities. Our recommendation is that you use HTTP Headers (and don't use Cookies) if you're building a Single Page App or using AJAX to make calls.
-
-```bash
-# Use headers for passing tokens
-curl --header "session-token:AD332DA12323AAA" "http://www.example.com/placeOrder(itemId, quantity, sessionToken)?itemId=200&quantity=3"
-```
-
-## Order of searching parameters in a Request
-
-NSOAP server-side routers must attempt to find parameter values in the following order
-
-- Headers
-- Querystring
-- Body
-- Cookies
-
-This means that if a parameter say "x" is defined in the Headers and in the Body, the value found in Headers will take precedence.
-
-## Status Codes
-
-Router will set the status code to 200 when the function executes without errors and 500 if an exception was thrown. If special status codes are needed (say HTTP 301 Permanent Redirect), applications should use Raw Request and Response Handling as in the following example.
-
-```javascript
-const myApp = {
-  getCustomer(id) {
-    return (req, res) => {
-      res.status(200).send("Hello")
-    }
-  },
-}
-```
-
-## Reading and Writing Streams
-
-To read or write streams, you can use Raw Request and Response Handling.
-
-```javascript
-const myApp = {
-  streamData() {
-    return (req, res) => {
-      const interval = setInterval(() => {
-        res.write(JSON.stringify({ foo: Math.random() * 100, count: ++c }) + '\n');
-        if (c === 10) {
-          clearInterval(interval);
-          res.end();
+  team: teamId => [
+    TeamPage, //Component
+    { teamId }, //Props
+    { //Child routes
+      player: jerseyNumber => [
+        PlayerComponent, //Component
+        { jerseyNumber }, //Props
+        { //Child routes
+          game: gameId => [GameComponent, { gameId }]
         }
-      }, 1000);
+      ]
     }
-  },
-}
+  ]
+};
+
+ReactDOM.render(Router(myApp), mountNode);
 ```
 
-## Advanced Options
+This is how you’d define routes with Sailboat. Note that there was no need to define “index” routes to match just the parent.
 
-Additional options may be pass in via the options object while initializing the router.
-*You would probably not need any of these.*
+## **Async Handlers and Streaming**
 
-### urlPrefix: string
-
-Makes the router handle only urls prefixed with the specified path.
-
-```javascript
-//...
-const options = { urlPrefix: "/home" };
-app.use(nsoap(myApp, options));
-```
-
-### alwaysUseJSON: boolean
-
-When the result of invoking a handler is a string, the router defaults to sending it as text instead of JSON.
-In this case, the result goes into response.text instead of response.body. The alwaysUseJSON setting can be used to force JSON responses even when the result is a string.
-
-```javascript
-//...
-const options = { alwaysUseJSON: true };
-app.use(nsoap(myApp, options));
-```
-
-### appendContext: boolean
-
-Passes the ExpressJS context (request and response object) as a method parameter.
-By default the context is the object { req, res, isContext: () => true }  
-
-By doing this, you might be able to avoid Raw Request and Response Handling.
-Note that the context is passed in as the first argument.
+What if you want to show the team page only after you fetch all the team data? Let’s try.
 
 ```javascript
 const myApp = {
-  addTwoNumbers(context, x, y) {
-    if (context.req.method === "GET") {
-      return x + y;
+  async team(teamId) {
+    ***const team = await getTeamFromDatabase();***
+    return [
+      TeamPage,
+      { team },
+      {
+        async player(jerseyNumber) {
+          ***const player = await team.getPlayer(jerseyNumber);***
+          return [
+            PlayerComponent,
+            { player },
+            {
+              game: gameId => [GameComponent, { gameId }]
+            }
+          ];
+        }
+      }
+    ];
+  }
+};
+
+ReactDOM.render(Router(myApp), mountNode);
+```
+
+A small problem with the code above is that the page will refresh only after all the async calls are complete. Ideally you should be showing a Spinner (“loading…” indicators) while waiting for the data to arrive. Right?
+
+Sailboat lets you do that using generators. Here’s the rewritten player() function. (Some of the code is removed for brevity).
+
+```javascript
+{
+  //....
+  async *player(jerseyNumber) {
+    //show a spinner
+    **yield <Spinner />;**
+    const player = await team.getPlayer(jerseyNumber);
+    //show the real thing
+    return [
+      PlayerComponent,
+      { player },
+      {
+        game: gameId => [GameComponent, { gameId }]
+      }
+    ];
+  }
+};
+```
+
+It renders a Spinner while fetching the data. Once the data is available, it renders the actual PlayerComponent.
+
+By the way, you can keep streaming HTML without ever returning. The following route streams seconds.
+
+```javascript
+{
+  //....
+  async *seconds() {
+    let counter = 0;
+    while(true) {
+      yield <div>${counter} seconds have passed.</div>
+      await sleep(1);
+      counter++;
     }
   }
 }
-
-const options = { appendContext: true };
-app.use(nsoap(myApp, options));
 ```
 
-You can also choose to respond directly via the context.
-If so, ensure that you set context.handled to let the router know that the response needs no additional handling. 
+## Works automatically with Redux and the like.
+
+Since route handlers in Sailboat are simple functions, it automatically works with state management libraries like Redux.
+
+In the following example, a route change causes an action to be fired. The action could cause a change in state and thus re-render the UI.
 
 ```javascript
+//Callable as /getTeam(245)
 const myApp = {
-  addTwoNumbers(context, x, y) {
-    context.handled = true;
-    context.res.status(200).send(`${x + y}`)
+  getTeam(teamId) {
+    actions.loadTeam(teamId);
   }
-}
-
-const options = { appendContext: true };
-app.use(nsoap(myApp, options));
+};
 ```
 
-### createContext(context: Object) : Object
+## Multiple instances of the Router
 
-The context passed by setting appendContext can be altered by using the createContext option.
+Sailboat returns a regular React Component which can be used just like any other React Component. It’s perfectly alright to have multiple instances of the Sailboat Router in the same page.
 
 ```javascript
-const myApp = {
-  addTwoNumbers(context, x, y) {
-    if (context.IS_ADMIN) {
-      return x + y;
-    }
-  }
+import { Router } from "sailboat";
+
+const routes1 = {
+  customers: { index: <CustomersPage /> }
 }
 
-function createContext(context) {
-  return { ...context, IS_ADMIN: req.connection.remoteAddress === "127.0.0.1" }
+const routes1 = {
+  orders: { index: <OrdersPage /> }
 }
 
-const options = { appendContext: true, createContext };
-app.use(nsoap(myApp, options));
+const Customers = Router(routes1);
+const Order = Router(routes2);
+
+const App =
+  <div>
+    <Customers />
+    <Orders />
+  </div>;
+
+ReactDOM.render(<App />, mountNode);
 ```
 
-### getBody(req: Request) : Object
+It should bepossible to embed Sailboat instances in an app driven by another router such as React Router, or even inside an Angular or Backbone app.
 
-Allows an app to alter the body parameter dictionary passed into the router.
-If getBody is not defined, the body is assumed to be req.body; which is what middleware like "bodyparser" do.
+## Server-side Rendering
 
-The following example adds additional parameters to the body dictionary which was already created by bodyparser.
+While rendering on the server, navigateTo should be called before renderToString(). Here’s an example with ExpressJS.
 
 ```javascript
-function getBody(req) {
-  return { ...req.body, newParam: 1, anotherParam: "TWO" }
-}
+import { Router, navigateTo } from "sailboat";
 
-const options = { getBody };
-app.use(nsoap(myApp, options));
+const myRoutes = { 
+  //....omitted for brevity
+};
+
+router.get("*", (req, res) => {
+  navigateTo(req.url);
+  const content = ReactDOMServer.renderToString(Router(myRoutes));
+  res.render("index", { title: "Sailboat", data: false, content });
+});
 ```
 
-### getCookies(req: Request) : Object
+If you were rendering to the DOM, you could have called navigateTo after the ReactDOM.render() is called.
 
-Allows an app to alter the Cookies parameter dictionary passed into the router.
-If getCookies is not defined, the body is assumed to be req.cookies; which is what middleware like "cookie-parser" do.
+## Sailboat versus React Router
 
-The following example adds additional parameters to the cookies dictionary which was already created by cookie-parser.
+Sailboat differs from React Router (and most others) by its use of NSOAP as the convention for defining routes. This gives you async routes, component streaming, easy integration with other libraries, familiar JS syntax and way better flexibility. All out of the box.
 
-```javascript
-function getCookies(req) {
-  return { ...req.cookies, newParam: 1, anotherParam: "TWO" }
-}
+### What about nesting routes inside components like React Router v4?
 
-const options = { getCookies };
-app.use(nsoap(myApp, options));
-```
+Sure you can. Left as an exercise to the reader.
 
-### parseQuery(query: Object) : Object
+## Browser History
 
-Allows an app to alter the querystring dictionary passed into NSOAP.
+Use HTML5 APIs.
 
-```javascript
-function parseQuery(query) {
-  return { ...query, id: 100 }
-}
+## Example Apps
 
-const options = { parseQuery };
-app.use(nsoap(myApp, options));
-```
-
-### parseBody(body: Object) : Object
-
-Allows an app to alter the body dictionary passed into NSOAP.
-This is the same dictionary that was previously constructed via getBody() or in its absense req.body.
-
-```javascript
-function parseBody(body) {
-  return { ...body, id: 100 }
-}
-
-const options = { parseBody };
-app.use(nsoap(myApp, options));
-```
-
-### parseHeaders(headers: Object) : Object
-
-Allows an app to alter the headers dictionary passed into NSOAP.
-
-```javascript
-function parseHeaders(headers) {
-  return { ...headers, id: 100 }
-}
-
-const options = { parseHeaders };
-app.use(nsoap(myApp, options));
-```
-
-### parseCookies(cookies: Object) : Object
-
-Allows an app to alter the cookies dictionary passed into NSOAP.
-
-```javascript
-function parseCookies(cookies) {
-  return { ...cookies, id: 100 }
-}
-
-const options = { parseCookies };
-app.use(nsoap(myApp, options));
-```
+Go to the [Sailboat Playground](https://github.com/nsoap-official/sailboat-playground).
