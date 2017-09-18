@@ -203,13 +203,13 @@ What if you want to show the team page only after you fetch all the team data? L
 ```javascript
 const myApp = {
   async team(teamId) {
-    ***const team = await getTeamFromDatabase();***
+    const team = await getTeamFromDatabase();
     return [
       TeamPage,
       { team },
       {
         async player(jerseyNumber) {
-          ***const player = await team.getPlayer(jerseyNumber);***
+          const player = await team.getPlayer(jerseyNumber);
           return [
             PlayerComponent,
             { player },
