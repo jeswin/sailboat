@@ -235,7 +235,7 @@ Sailboat lets you do that using generators. Here’s the rewritten player() func
   //....
   async *player(jerseyNumber) {
     //show a spinner
-    **yield <Spinner />;**
+    yield <Spinner />;
     const player = await team.getPlayer(jerseyNumber);
     //show the real thing
     return [
