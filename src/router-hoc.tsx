@@ -1,11 +1,16 @@
-import React, { Component } from "react";
-import URL from "url-parse";
+import * as React from "react";
+import { Component, ComponentClass } from "react";
+import URL = require("url-parse");
 import nsoap from "nsoap";
 
 const identifierRegex = /^[a-zA-Z_$][a-zA-Z_$0-9]*$/;
 
-function parseDict(dict) {
-  return key => {
+export type Dict = {
+  [key: string]: any;
+};
+
+function parseDict(dict: Dict) {
+  return (key: string) => {
     if (Object.prototype.hasOwnProperty.call(dict, key)) {
       const val = dict[key];
       return {
@@ -20,7 +25,7 @@ function parseDict(dict) {
   };
 }
 
-function parseQuery(query) {
+function parseQuery(query: Dict) {
   return parseDict(query);
 }
 
@@ -28,15 +33,17 @@ function parseQuery(query) {
   Check if an item is a React Element or not.
   React elements are "instantiated" <Components />
 */
-function isElement(element) {
+function isElement(element: any): element is JSX.Element {
   return React.isValidElement(element);
 }
 
-function isIterable(gen) {
-  return typeof gen !== "undefined" && gen.next && typeof gen.next === "function";
+function isIterable(gen: any): gen is Generator {
+  return (
+    typeof gen !== "undefined" && gen.next && typeof gen.next === "function"
+  );
 }
 
-async function* iterateToEnd(gen) {
+async function* iterateToEnd(gen: Generator) {
   while (true) {
     const genResult = await gen.next();
     if (genResult.done) {
@@ -47,17 +54,22 @@ async function* iterateToEnd(gen) {
   }
 }
 
-const PARENT = Symbol("Parent");
-const COMPONENT = Symbol("Component");
+export const PARENT = Symbol("Parent");
+export const COMPONENT = Symbol("Component");
 
-function renderTree(item, current) {
+export type Current = {
+  [COMPONENT]: [ComponentClass, any];
+  [PARENT]: Current;
+};
+
+function renderTree(item: JSX.Element | undefined, current: Current): any {
   if (current[COMPONENT]) {
     const [ParentComponent, parentProps] = current[COMPONENT];
-    const rendered = item
-      ? <ParentComponent {...parentProps}>
-          {item}
-        </ParentComponent>
-      : <ParentComponent {...parentProps} />;
+    const rendered = item ? (
+      <ParentComponent {...parentProps}>{item}</ParentComponent>
+    ) : (
+      <ParentComponent {...parentProps} />
+    );
     return current[PARENT] ? renderTree(rendered, current[PARENT]) : rendered;
   } else {
     return item;
@@ -65,14 +77,19 @@ function renderTree(item, current) {
 }
 
 export default class RouterHOC extends Component {
-  constructor(props) {
+  traverse: Function;
+  onNextValue: Function;
+  props: any;
+  state: any;
+
+  constructor(props: any) {
     super(props);
 
     this.traverse = this._traverse.bind(this);
     this.onNextValue = this._onNextValue.bind(this);
 
     const _urlPrefix = this.props.options.urlPrefix || "/";
-    const urlPrefix = _urlPrefix.endsWith("/") ? _urlPrefix : `${urlPrefix}/`;
+    const urlPrefix = _urlPrefix.endsWith("/") ? _urlPrefix : `${_urlPrefix}/`;
     this.state = { urlPrefix };
   }
 
@@ -84,7 +101,7 @@ export default class RouterHOC extends Component {
     this.props.onUnmount(this);
   }
 
-  _traverse(key, current) {
+  _traverse(key: string, current: any) {
     const index = (this.props.options && this.props.options.index) || "index";
 
     const item = current[key];
@@ -125,14 +142,14 @@ export default class RouterHOC extends Component {
     }
   }
 
-  _onNextValue(childElement, current) {
-    const element = renderTree(childElement, current)
+  _onNextValue(childElement: JSX.Element, current: Current) {
+    const element = renderTree(childElement, current);
     this.setState(state => ({ state, element }));
   }
 
-  async navigateTo(url) {
-    const parsed = new URL(url, true);
-    const req = { url: parsed.url, path: parsed.pathname, query: parsed.query };
+  async navigateTo(url: string) {
+    const parsed = URL(url, true);
+    const req = { url, path: parsed.pathname, query: parsed.query };
 
     if (url !== this.state.url) {
       //If the prefix is not correct, we don't need to do anything
@@ -140,11 +157,12 @@ export default class RouterHOC extends Component {
         const strippedPath = req.path.substring(this.state.urlPrefix.length);
         const dicts = [
           this.props.options.parseQuery
-            ? this.props.options.parseQuery(query)
+            ? this.props.options.parseQuery(req.query)
             : parseQuery(req.query)
         ];
 
-        const createContext = this.props.options.createContext || (x => x);
+        const createContext =
+          this.props.options.createContext || ((x: any) => x);
         const context = this.props.options.appendContext
           ? createContext({ req, isContext: () => true })
           : [];
@@ -155,6 +173,7 @@ export default class RouterHOC extends Component {
           onNextValue: this.onNextValue,
           useSlash: !!this.props.options.useSlash
         });
+
         this.setState(state => ({ ...state, element }));
       }
     }
@@ -162,9 +181,7 @@ export default class RouterHOC extends Component {
 
   render() {
     return (
-      <div className="__nsoap_router_container__">
-        {this.state.element}
-      </div>
+      <div className="__nsoap_router_container__">{this.state.element}</div>
     );
   }
 }

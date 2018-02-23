@@ -3,18 +3,17 @@
 const { JSDOM } = require('jsdom');
 
 const jsdom = new JSDOM('<!doctype html><html><body></body></html>');
-const { window } = jsdom;
 
-function copyProps(src, target) {
+function copyProps(src: any, target: any) {
   const props = Object.getOwnPropertyNames(src)
     .filter(prop => typeof target[prop] === 'undefined')
     .map(prop => Object.getOwnPropertyDescriptor(src, prop));
-  Object.defineProperties(target, props);
+  Object.defineProperties(target, props as any);
 }
 
-global.window = window;
-global.document = window.document;
-global.navigator = {
+(global as any).window = jsdom.window;
+(global as any).document = window.document;
+(global as any).navigator = {
   userAgent: 'node.js',
 };
 copyProps(window, global);

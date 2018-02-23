@@ -1,37 +1,38 @@
 {
   "name": "sailboat",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
-  "main": "dist/sailboat",
+  "main": "./dist",
+  "types": "./dist",
   "scripts": {
     "build": "./build.sh",
-    "test": "./build.sh && mocha --require source-map-support/register dist/test/test.js",
-    "test-debug": "./build.sh && mocha --debug-brk --require source-map-support/register dist/test/test.js"
+    "test": "./build.sh && mocha dist/test/test.js",
+    "test-debug": "./build.sh && mocha --debug-brk dist/test/test.js"
   },
   "license": "MIT",
   "dependencies": {
-    "nsoap": "^0.0.15",
-    "react": "^15.6.1",
+    "@types/react": "^16.0.38",
+    "@types/react-dom": "^16.0.4",
+    "@types/url-parse": "^1.1.0",
+    "nsoap": "^0.0.18",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
     "url-parse": "^1.1.9"
   },
   "devDependencies": {
+    "@types/enzyme": "^3.1.9",
+    "@types/jsdom": "^11.0.4",
+    "@types/mocha": "^2.2.48",
+    "@types/node": "^9.4.6",
+    "@types/react-test-renderer": "^16.0.1",
+    "@types/should": "^13.0.0",
     "await-signal": "^0.1.2",
-    "babel-loader": "*",
-    "babel-plugin-transform-async-to-generator": "*",
-    "babel-polyfill": "^6.23.0",
-    "babel-preset-es2015-without-regenerator": "^1.0.1",
-    "babel-preset-es2016": "^6.24.1",
-    "babel-preset-es2017": "^6.24.1",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-3": "^6.24.1",
-    "enzyme": "^2.9.1",
-    "jsdom": "^11.1.0",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "jsdom": "^11.6.2",
     "mocha": "*",
-    "react-dom": "^15.6.1",
-    "react-test-renderer": "^15.6.1",
-    "should": "*",
-    "should-enzyme": "^1.4.0",
-    "source-map-loader": "*",
-    "source-map-support": "*"
+    "react-test-utils": "^0.0.1",
+    "should": "^13.2.1",
+    "should-enzyme": "^2.0.0"
   }
 }
