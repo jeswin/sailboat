@@ -59,6 +59,8 @@ const NestedStreamContainer = (props: any) => (
   </div>
 );
 
+const DeeplyNestedComponent = () => <div>Deeply Nested</div>;
+
 async function getTeamName(teamId: number) {
   return `Team Number ${teamId}`;
 }
@@ -136,6 +138,12 @@ const routes = {
         }
       }
     ];
+  },
+
+  deeply: {
+    nested: {
+      item: <DeeplyNestedComponent />
+    }
   }
 };
 
@@ -165,38 +173,59 @@ describe("NSOAP React", async () => {
 
   it("Renders the home page", async () => {
     await withWrapper("/", (wrapper: any) => {
-      wrapper.render().find("h1").should.have.text("Home Page");
+      wrapper
+        .render()
+        .find("h1")
+        .should.have.text("Home Page");
     });
   });
 
   it("Renders a url", async () => {
     await withWrapper("/about", (wrapper: any) => {
-      wrapper.render().find("h1").should.have.text("About Page");
+      wrapper
+        .render()
+        .find("h1")
+        .should.have.text("About Page");
     });
   });
 
   it("Renders a route with a param", async () => {
     await withWrapper("/withParam(666)", (wrapper: any) => {
-      wrapper.render().find("h1").should.have.text("Parameter was 666");
+      wrapper
+        .render()
+        .find("h1")
+        .should.have.text("Parameter was 666");
     });
   });
 
   it("Renders a route with a param passed in querystring", async () => {
     await withWrapper("/withParam(x)?x=666", (wrapper: any) => {
-      wrapper.render().find("h1").should.have.text("Parameter was 666");
+      wrapper
+        .render()
+        .find("h1")
+        .should.have.text("Parameter was 666");
     });
   });
 
   it("Renders async route", async () => {
     await withWrapper("/team(100)", (wrapper: any) => {
-      wrapper.render().find("h1").should.have.text("Team page for Team Number 100");
+      wrapper
+        .render()
+        .find("h1")
+        .should.have.text("Team page for Team Number 100");
     });
   });
 
   it("Renders an child route", async () => {
     await withWrapper("/team(100).player(10)", (wrapper: any) => {
-      wrapper.render().find("h1").should.have.text("Team page for Team Number 100");
-      wrapper.render().find("h2").should.have.text("Player details for Miss 10");
+      wrapper
+        .render()
+        .find("h1")
+        .should.have.text("Team page for Team Number 100");
+      wrapper
+        .render()
+        .find("h2")
+        .should.have.text("Player details for Miss 10");
     });
   });
 
@@ -204,8 +233,14 @@ describe("NSOAP React", async () => {
     await withWrapper(
       "/team(100)/player(10)",
       (wrapper: any) => {
-        wrapper.render().find("h1").should.have.text("Team page for Team Number 100");
-        wrapper.render().find("h2").should.have.text("Player details for Miss 10");
+        wrapper
+          .render()
+          .find("h1")
+          .should.have.text("Team page for Team Number 100");
+        wrapper
+          .render()
+          .find("h2")
+          .should.have.text("Player details for Miss 10");
       },
       { useSlash: true }
     );
@@ -213,9 +248,18 @@ describe("NSOAP React", async () => {
 
   it("Renders an grand-child route", async () => {
     await withWrapper("/team(100).player(10).game(1)", (wrapper: any) => {
-      wrapper.render().find("h1").should.have.text("Team page for Team Number 100");
-      wrapper.render().find("h2").should.have.text("Player details for Miss 10");
-      wrapper.render().find("h3").should.have.text("Played game number 1");
+      wrapper
+        .render()
+        .find("h1")
+        .should.have.text("Team page for Team Number 100");
+      wrapper
+        .render()
+        .find("h2")
+        .should.have.text("Player details for Miss 10");
+      wrapper
+        .render()
+        .find("h3")
+        .should.have.text("Played game number 1");
     });
   });
 
@@ -229,7 +273,10 @@ describe("NSOAP React", async () => {
       </ul>
     );
     await navigateTo("/about");
-    wrapper.render().find("h1").length.should.equal(2);
+    wrapper
+      .render()
+      .find("h1")
+      .length.should.equal(2);
     reset();
   });
 
@@ -241,16 +288,25 @@ describe("NSOAP React", async () => {
 
     await testTraffic.until(true);
     testTraffic.state = false;
-    wrapper.render().find("h1").should.have.text("Stream 1");
+    wrapper
+      .render()
+      .find("h1")
+      .should.have.text("Stream 1");
     streamTraffic.state = true;
 
     await testTraffic.until(true);
     testTraffic.state = false;
-    wrapper.render().find("h1").should.have.text("Stream 2");
+    wrapper
+      .render()
+      .find("h1")
+      .should.have.text("Stream 2");
     streamTraffic.state = true;
 
     return promise.then(() => {
-      wrapper.render().find("h1").should.have.text("End of Stream");
+      wrapper
+        .render()
+        .find("h1")
+        .should.have.text("End of Stream");
     });
   });
 
@@ -262,19 +318,46 @@ describe("NSOAP React", async () => {
 
     await testTraffic.until(true);
     testTraffic.state = false;
-    wrapper.render().find("h1").should.have.text("Nested Streaming");
-    wrapper.render().find("h2").should.have.text("Stream 1");
+    wrapper
+      .render()
+      .find("h1")
+      .should.have.text("Nested Streaming");
+    wrapper
+      .render()
+      .find("h2")
+      .should.have.text("Stream 1");
     streamTraffic.state = true;
 
     await testTraffic.until(true);
     testTraffic.state = false;
-    wrapper.render().find("h1").should.have.text("Nested Streaming");
-    wrapper.render().find("h2").should.have.text("Stream 2");
+    wrapper
+      .render()
+      .find("h1")
+      .should.have.text("Nested Streaming");
+    wrapper
+      .render()
+      .find("h2")
+      .should.have.text("Stream 2");
     streamTraffic.state = true;
 
     return promise.then(() => {
-      wrapper.render().find("h1").should.have.text("Nested Streaming");
-      wrapper.render().find("h2").should.have.text("End of Stream");
+      wrapper
+        .render()
+        .find("h1")
+        .should.have.text("Nested Streaming");
+      wrapper
+        .render()
+        .find("h2")
+        .should.have.text("End of Stream");
     });
+  });
+
+  it("Renders a nested, namespaced component", async () => {
+      await withWrapper("/deeply.nested.item", (wrapper: any) => {
+        wrapper
+          .render()
+          .find("div")
+          .should.have.text("Deeply Nested");
+      });
   });
 });

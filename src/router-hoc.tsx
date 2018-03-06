@@ -126,14 +126,18 @@ export default class RouterHOC extends Component {
           if (typeof result === "undefined" || isElement(result)) {
             return renderTree(result, current);
           } else {
-            const [Component, props, children] = result;
-            const val = {
-              [index]: () => undefined,
-              [PARENT]: current,
-              [COMPONENT]: [Component, props]
-            };
+            return Array.isArray(result)
+              ? (() => {
+                  const [Component, props, children] = result;
+                  const val = {
+                    [index]: () => undefined,
+                    [PARENT]: current,
+                    [COMPONENT]: [Component, props]
+                  };
 
-            return children ? { ...val, ...children } : val;
+                  return children ? { ...val, ...children } : val;
+                })()
+              : result;
           }
         },
         [PARENT]: current[PARENT],

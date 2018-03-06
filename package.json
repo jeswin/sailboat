@@ -1,6 +1,6 @@
 {
   "name": "sailboat",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "./dist",
   "types": "./dist",
