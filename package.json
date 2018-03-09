@@ -1,6 +1,6 @@
 {
   "name": "sailboat",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "./dist",
   "types": "./dist",
@@ -11,6 +11,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@types/node": "^9.4.7",
     "@types/react": "^16.0.38",
     "@types/react-dom": "^16.0.4",
     "@types/url-parse": "^1.1.0",
@@ -23,14 +24,13 @@
     "@types/enzyme": "^3.1.9",
     "@types/jsdom": "^11.0.4",
     "@types/mocha": "^2.2.48",
-    "@types/node": "^9.4.6",
     "@types/react-test-renderer": "^16.0.1",
     "@types/should": "^13.0.0",
     "await-signal": "^0.1.2",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "jsdom": "^11.6.2",
-    "mocha": "*",
+    "mocha": "5.0.4",
     "react-test-utils": "^0.0.1",
     "should": "^13.2.1",
     "should-enzyme": "^2.0.0"
