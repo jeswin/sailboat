@@ -1,11 +1,10 @@
 {
   "name": "sailboat",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "./dist",
   "types": "./dist",
   "scripts": {
-    "build": "./build.sh",
     "test": "./build.sh && mocha dist/test/test.js",
     "test-debug": "./build.sh && mocha --debug-brk dist/test/test.js"
   },
