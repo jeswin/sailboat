@@ -152,7 +152,7 @@ export default class RouterHOC extends Component {
   }
 
   async navigateTo(url: string) {
-    const parsed = URL(url, true);
+    const parsed = URL(url, {}, true);
     const req = { url, path: parsed.pathname, query: parsed.query };
 
     if (url !== this.state.url) {

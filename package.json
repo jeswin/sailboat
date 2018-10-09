@@ -1,6 +1,6 @@
 {
   "name": "sailboat",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "./dist",
   "types": "./dist",
@@ -10,11 +10,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^9.4.7",
+    "@types/node": "^10.11.5",
     "@types/react": "^16.0.38",
     "@types/react-dom": "^16.0.4",
     "@types/url-parse": "^1.1.0",
-    "nsoap": "^0.0.18",
+    "nsoap": "^0.1.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "url-parse": "^1.1.9"
@@ -22,14 +22,14 @@
   "devDependencies": {
     "@types/enzyme": "^3.1.9",
     "@types/jsdom": "^11.0.4",
-    "@types/mocha": "^2.2.48",
+    "@types/mocha": "^5.2.5",
     "@types/react-test-renderer": "^16.0.1",
     "@types/should": "^13.0.0",
     "await-signal": "^0.1.2",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
-    "jsdom": "^11.6.2",
-    "mocha": "5.0.4",
+    "jsdom": "^12.2.0",
+    "mocha": "5.2.0",
     "react-test-utils": "^0.0.1",
     "should": "^13.2.1",
     "should-enzyme": "^2.0.0"
